@@ -11,7 +11,7 @@ pipeline {
                     sh '''
                     terraform workspace select test || terraform workspace new test
                     terraform init
-                    terraform destroy -auto-approve
+                    terraform apply -auto-approve
                     '''
                 }
               }
