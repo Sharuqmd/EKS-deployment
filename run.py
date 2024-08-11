@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 # URL of the Selenium Grid or remote WebDriver server
-selenium_server_url = "http://your-selenium-server-url:4444/wd/hub"
+selenium_server_url = "http://13.234.117.197:4444/wd/hub"
 
 # Specify the browser you want to use (e.g., Chrome)
 capabilities = {
