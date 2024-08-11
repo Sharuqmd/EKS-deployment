@@ -3,7 +3,36 @@ pipeline {
     environment {
         AWS_CREDENTIALS_ID = 'aws'
     }
+    
     stages {
+        stages {
+        stage('Terraform Apply') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        sh '''
+                        terraform workspace select test || terraform workspace new test
+                        terraform init
+                        terraform apply -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Configure kubectl') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        sh '''
+                        aws eks update-kubeconfig --name eks-my-cluster --region ap-south-1
+                        '''
+                        sh '''
+                        kubectl apply -f k8.yaml
+                        '''
+                    }
+                }
+            }
+        }
         stage('Fetch Service Endpoint') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
