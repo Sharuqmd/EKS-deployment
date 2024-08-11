@@ -3,9 +3,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 
-# Initialize the WebDriver (assuming you are using Chrome)
-print("Initializing WebDriver...")
-driver = webdriver.Chrome()
+# URL of the Selenium Grid or remote WebDriver server
+selenium_server_url = "http://your-selenium-server-url:4444/wd/hub"
+
+# Specify the browser you want to use (e.g., Chrome)
+capabilities = {
+    "browserName": "chrome",
+    "platform": "ANY",
+}
+
+print("Connecting to remote Selenium WebDriver...")
+driver = webdriver.Remote(command_executor=selenium_server_url, desired_capabilities=capabilities)
 
 try:
     # Step 1: Navigate to the application URL
