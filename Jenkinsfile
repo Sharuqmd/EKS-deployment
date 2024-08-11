@@ -96,23 +96,31 @@ pipeline {
                 }
             }
         }
-        stage('Fetch Prod Service Endpoint') {
+        stage('Fetch prod Service Endpoint') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
+                        // Print the current Kubernetes context
+                        sh 'kubectl config current-context'
+                        
+                        // Print the service details for debugging
+                        sh 'kubectl get svc'
+                        
+                        // Fetch the service external DNS name
                         def externalIp = sh(script: '''
                             kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                             ''', returnStdout: true).trim()
                         
+                        // Ensure the DNS name is properly formatted
                         if (externalIp) {
-                            echo "Prod Service External Endpoint: ${externalIp}"
+                            echo "Service External DNS: ${externalIp}"
+                            // Set the endpoint URL environment variable for the Selenium script
                             env.ENDPOINT_URL = "http://${externalIp}:8082"
                         } else {
-                            error "Failed to fetch the production service external endpoint."
+                            error "Failed to fetch the service external DNS name."
                         }
                     }
                 }
             }
         }
-    }
 }
