@@ -36,7 +36,7 @@ pipeline {
                 script {
                     // Fetch the service external IP
                     def externalIp = sh(script: '''
-                        kubectl get svc your-service-name -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+                        kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
                         ''', returnStdout: true).trim()
                     
                     // Ensure the IP is properly formatted
