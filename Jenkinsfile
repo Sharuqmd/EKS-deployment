@@ -58,13 +58,28 @@ pipeline {
                 }
             }
         }
+        stage('Setup Python Environment') {
+            steps {
+                script {
+                    // Create and activate a virtual environment
+                    sh '''
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install selenium
+                    '''
+                }
+            }
+        }
         stage('Run Selenium Test') {
             steps {
                 script {
                     // Ensure the ENDPOINT_URL environment variable is set
                     if (env.ENDPOINT_URL) {
                         // Run the Selenium script with the endpoint URL
-                        sh "python3 run.py ${env.ENDPOINT_URL}"
+                        sh '''
+                        source venv/bin/activate
+                        python3 run.py ${ENDPOINT_URL}
+                        '''
                     } else {
                         error "Endpoint URL is not set. Cannot run Selenium test."
                     }
