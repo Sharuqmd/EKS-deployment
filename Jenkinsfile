@@ -41,18 +41,18 @@ pipeline {
                         // Print the service details for debugging
                         sh 'kubectl get svc'
                         
-                        // Fetch the service external IP
+                        // Fetch the service external DNS name
                         def externalIp = sh(script: '''
-                            kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+                            kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                             ''', returnStdout: true).trim()
                         
-                        // Ensure the IP is properly formatted
+                        // Ensure the DNS name is properly formatted
                         if (externalIp) {
-                            echo "Service External IP: ${externalIp}"
+                            echo "Service External DNS: ${externalIp}"
                             // Set the endpoint URL environment variable for the Selenium script
-                            env.ENDPOINT_URL = "http://${externalIp}:8080"
+                            env.ENDPOINT_URL = "http://${externalIp}:8082"
                         } else {
-                            error "Failed to fetch the service external IP."
+                            error "Failed to fetch the service external DNS name."
                         }
                     }
                 }
