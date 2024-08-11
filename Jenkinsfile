@@ -31,27 +31,34 @@ pipeline {
                 }
             }
         }
-        stage('Fetch Service Endpoint') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
-                    script {
-                        // Fetch the service external IP
-                        def externalIp = sh(script: '''
-                            kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-                            ''', returnStdout: true).trim()
-                        
-                        // Ensure the IP is properly formatted
-                        if (externalIp) {
-                            echo "Service External IP: ${externalIp}"
-                            // Set the endpoint URL environment variable for the Selenium script
-                            env.ENDPOINT_URL = "http://${externalIp}:8080"
-                        } else {
-                            error "Failed to fetch the service external IP."
-                        }
-                    }
+       stage('Fetch Service Endpoint') {
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+            script {
+                // Print the current Kubernetes context
+                sh 'kubectl config current-context'
+                
+                // Print the service details for debugging
+                sh 'kubectl get svc'
+                
+                // Fetch the service external IP
+                def externalIp = sh(script: '''
+                    kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+                    ''', returnStdout: true).trim()
+                
+                // Ensure the IP is properly formatted
+                if (externalIp) {
+                    echo "Service External IP: ${externalIp}"
+                    // Set the endpoint URL environment variable for the Selenium script
+                    env.ENDPOINT_URL = "http://${externalIp}:8080"
+                } else {
+                    error "Failed to fetch the service external IP."
                 }
             }
         }
+    }
+}
+
         stage('Run Selenium Test') {
             steps {
                 script {
