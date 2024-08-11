@@ -1,25 +1,19 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-import time
 import os
+import time
 
 # URL of the Selenium Grid or remote WebDriver server
-selenium_server_url = "http://13.234.117.197:4444/wd/hub"
+selenium_server_url = os.getenv("ENDPOINT_URL", "http://your-application-url.com")
 
-# Browser options
+# Configure Chrome options
 options = Options()
-options.add_argument("--headless")  # Run in headless mode if needed
+options.add_argument("--headless")  # Run in headless mode
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
-# Define capabilities
-capabilities = options.to_capabilities()
-capabilities['browserName'] = 'chrome'
-capabilities['platform'] = 'ANY'
-
+# Initialize WebDriver
 print("Connecting to remote Selenium WebDriver...")
 driver = webdriver.Remote(
     command_executor=selenium_server_url,
