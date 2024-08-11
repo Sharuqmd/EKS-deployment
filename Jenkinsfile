@@ -12,13 +12,25 @@ pipeline {
                         sh '''
                         terraform workspace select test || terraform workspace new test
                         terraform init
-                        terraform apply -auto-approve
+                        terraform destroy -auto-approve
                         '''
                     }
                 }
             }
         }
-        
+        stage('Terraform Apply Test') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        sh '''
+                        terraform workspace select prod 
+                        terraform init
+                        terraform destory -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
         stage('Deploy Test Application') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
