@@ -9,18 +9,22 @@ import os
 # URL of the Selenium Grid or remote WebDriver server
 selenium_server_url = "http://13.234.117.197:4444/wd/hub"
 
-# Browser capabilities and options
+# Browser options
 options = Options()
 options.add_argument("--headless")  # Run in headless mode if needed
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
+# Define capabilities
 capabilities = options.to_capabilities()
-capabilities["browserName"] = "chrome"
-capabilities["platform"] = "ANY"
+capabilities['browserName'] = 'chrome'
+capabilities['platform'] = 'ANY'
 
 print("Connecting to remote Selenium WebDriver...")
-driver = webdriver.Remote(command_executor=selenium_server_url, capabilities=capabilities)
+driver = webdriver.Remote(
+    command_executor=selenium_server_url,
+    options=options
+)
 
 try:
     # Step 1: Navigate to the application URL
