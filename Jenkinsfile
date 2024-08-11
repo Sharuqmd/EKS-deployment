@@ -31,14 +31,32 @@ pipeline {
               }
             }
         }
-        stage('Selenium test') {
+        stage('Fetch Service Endpoint') {
             steps {
-              sh " python3 -m venv my-venv "
-              sh " my-venv/bin/pip install selenium "
-              sh " source my-env/bin/activate"
-              sh " python3 test.py"
+                script {
+                    // Fetch the service external IP
+                    def externalIp = sh(script: '''
+                        kubectl get svc your-service-name -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+                        ''', returnStdout: true).trim()
+                    
+                    // Ensure the IP is properly formatted
+                    if (externalIp) {
+                        echo "Service External IP: ${externalIp}"
+                        // Set the endpoint URL environment variable for the Selenium script
+                        env.ENDPOINT_URL = "http://${externalIp}:8080"
+                    } else {
+                        error "Failed to fetch the service external IP."
+                    }
+                }
+            }
+        }
+        stage('Run Selenium Test') {
+            steps {
+                script {
+                    // Run the Selenium script with the endpoint URL
+                    sh "python3 run.py ${ENDPOINT_URL}"
+                }
             }
         }
     }
 }
-
