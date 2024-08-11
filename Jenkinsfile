@@ -4,84 +4,43 @@ pipeline {
         AWS_CREDENTIALS_ID = 'aws'
     }
     stages {
-        stage('Terraform Apply') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
-                    script {
-                        sh '''
-                        terraform workspace select test || terraform workspace new test
-                        terraform init
-                        terraform apply -auto-approve
-                        '''
-                    }
-                }
-            }
-        }
-        stage('Configure kubectl') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
-                    script {
-                        sh '''
-                        aws eks update-kubeconfig --name eks-my-cluster --region ap-south-1
-                        '''
-                        sh '''
-                        kubectl apply -f k8.yaml
-                        '''
-                    }
-                }
-            }
-        }
         stage('Fetch Service Endpoint') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
-                        // Print the current Kubernetes context
-                        sh 'kubectl config current-context'
+                        // Configure kubectl
+                        sh '''
+                        aws eks update-kubeconfig --name eks-my-cluster --region ap-south-1
+                        '''
                         
-                        // Print the service details for debugging
-                        sh 'kubectl get svc'
-                        
-                        // Fetch the service external DNS name
+                        // Fetch the service external IP
                         def externalIp = sh(script: '''
                             kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                             ''', returnStdout: true).trim()
                         
-                        // Ensure the DNS name is properly formatted
+                        // Ensure the IP is properly formatted
                         if (externalIp) {
-                            echo "Service External DNS: ${externalIp}"
+                            echo "Service External Endpoint: ${externalIp}"
                             // Set the endpoint URL environment variable for the Selenium script
                             env.ENDPOINT_URL = "http://${externalIp}:8082"
                         } else {
-                            error "Failed to fetch the service external DNS name."
+                            error "Failed to fetch the service external endpoint."
                         }
                     }
                 }
             }
         }
-        stage('Setup Python Environment') {
-            steps {
-                script {
-                    // Create and activate a virtual environment using Bash
-                    sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install selenium
-                    '''
-                }
-            }
-        }
         stage('Run Selenium Test') {
             steps {
-                script {
-                    // Ensure the ENDPOINT_URL environment variable is set
-                    if (env.ENDPOINT_URL) {
-                        // Run the Selenium script with the endpoint URL using Bash
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        // Activate Python virtual environment and run the Selenium script
                         sh '''
+                        python3 -m venv venv
                         . venv/bin/activate
+                        pip install selenium
                         python3 run.py ${ENDPOINT_URL}
                         '''
-                    } else {
-                        error "Endpoint URL is not set. Cannot run Selenium test."
                     }
                 }
             }
