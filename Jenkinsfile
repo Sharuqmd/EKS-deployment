@@ -61,11 +61,10 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 script {
-                    // Create and activate a virtual environment
+                    // Create and activate a virtual environment using Bash
                     sh '''
-                    
                     python3 -m venv venv
-                    source venv/bin/activate
+                    . venv/bin/activate
                     pip install selenium
                     '''
                 }
@@ -76,9 +75,9 @@ pipeline {
                 script {
                     // Ensure the ENDPOINT_URL environment variable is set
                     if (env.ENDPOINT_URL) {
-                        // Run the Selenium script with the endpoint URL
+                        // Run the Selenium script with the endpoint URL using Bash
                         sh '''
-                        source venv/bin/activate
+                        . venv/bin/activate
                         python3 run.py ${ENDPOINT_URL}
                         '''
                     } else {
