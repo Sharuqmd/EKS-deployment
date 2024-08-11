@@ -18,6 +18,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Deploy Test Application') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
@@ -30,7 +31,8 @@ pipeline {
                 }
             }
         }
-        stage('Fetch test Service Endpoint') {
+        
+        stage('Fetch Test Service Endpoint') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
@@ -57,6 +59,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Run Selenium Test on Test Environment') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
@@ -71,6 +74,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Terraform Apply Prod') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
@@ -84,6 +88,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Deploy Prod Application') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
@@ -96,7 +101,8 @@ pipeline {
                 }
             }
         }
-        stage('Fetch prod Service Endpoint') {
+        
+        stage('Fetch Prod Service Endpoint') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
@@ -123,4 +129,5 @@ pipeline {
                 }
             }
         }
+    }
 }
